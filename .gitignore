@@ -1,0 +1,14 @@
+# Machine Learning Checkpoints
+*.pth
+*.pth.tar
+latestOutput/
+results.zip
+
+# Python environments
+__pycache__/
+*.pyc
+.env
+venv/
+
+# Kaggle / Jupyter
+.ipynb_checkpoints/
