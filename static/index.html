@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SketchColor — Anime Sketch Colorization</title>
+  <meta name="description"
+    content="Upload an anime sketch and get a colorized version powered by a conditional GAN trained on anime artwork." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="hidden">
+    <div class="loader-inner">
+      <div class="spinner"></div>
+      <p class="loader-label">Processing</p>
+      <p class="loader-sub">Running inference through the generator network</p>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <span class="nav-brand">SketchColor</span>
+    <span class="nav-meta">cGAN · 195 epochs · Attention U-Net</span>
+  </nav>
+
+  <main class="main">
+
+    <!-- Hero -->
+    <section class="hero">
+      <h1 class="hero-title">Upload a sketch, get it colored.</h1>
+      <p class="hero-sub">Powered by a conditional GAN trained on anime artwork.</p>
+    </section>
+
+    <!-- Upload Zone (initial state) -->
+    <section id="upload-section">
+      <div class="upload-zone" id="drop-zone">
+        <p class="upload-primary">Drop an image here</p>
+        <p class="upload-secondary">or <span id="browse-link" class="link">click to browse</span> — PNG, JPG, WEBP</p>
+        <input type="file" id="file-input" accept="image/*" hidden />
+      </div>
+
+      <!-- Preview state (hidden until file chosen) -->
+      <div id="preview-state" class="preview-state hidden">
+        <div class="preview-row">
+          <div class="preview-thumb-wrap">
+            <p class="label">Your sketch</p>
+            <img id="sketch-thumb" src="" alt="Uploaded sketch" class="preview-thumb" />
+          </div>
+          <div class="preview-actions">
+            <button id="colorize-btn" class="btn btn-primary">Colorize</button>
+            <button id="reset-btn" class="btn btn-ghost">Remove</button>
+            <label class="toggle-wrap" title="Matches high-res colors to a reference image, or the original GAN output">
+              <input type="checkbox" id="color-transfer-toggle" />
+              <span class="toggle-label">Histogram Color Transfer</span>
+            </label>
+            <div id="reference-upload-group" class="hidden" style="margin-top: 6px;">
+              <p class="label" style="font-size: 0.6rem; margin-bottom: 4px;">Reference Image (Optional)</p>
+              <input type="file" id="reference-input" accept="image/*"
+                style="font-size: 0.7rem; color: var(--muted); cursor: pointer;" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Result section (hidden until result ready) -->
+    <section id="result-section" class="hidden">
+      <div class="result-header">
+        <p class="label">Result</p>
+        <div class="result-actions">
+          <a id="download-btn" class="btn btn-ghost" download="colorized.png">Download</a>
+          <button id="try-again-btn" class="btn btn-ghost">Try another</button>
+        </div>
+      </div>
+
+      <!-- Before/After slider -->
+      <div class="compare-wrap" id="compare-container">
+        <img id="result-color" class="compare-color" src="" alt="Colorized" />
+        <div class="compare-clip" id="compare-clip">
+          <img id="result-sketch" class="compare-sketch" src="" alt="Original" />
+        </div>
+        <div class="compare-handle" id="compare-handle">
+          <div class="handle-track"></div>
+          <div class="handle-knob"></div>
+          <div class="handle-track"></div>
+        </div>
+        <span class="compare-lbl lbl-left">Original</span>
+        <span class="compare-lbl lbl-right">Colorized</span>
+      </div>
+    </section>
+
+    <!-- Training progress -->
+    <section class="progress-section">
+      <h2 class="section-heading">Training Progress</h2>
+      <div class="sample-grid" id="sample-grid"></div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>Attention U-Net cGAN &mdash; Trained on Anime Sketch Colorization Pair dataset</p>
+  </footer>
+
+  <script src="/static/script.js"></script>
+</body>
+
+</html>
