@@ -652,13 +652,24 @@ body {
   border-top: 1px solid var(--border);
 }
 
+/* ─── Result Layout ─── */
+.result-layout {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.result-controls-col {
+  display: flex;
+  flex-direction: column;
+}
+
 .result-top {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 12px;
+  flex-direction: column;
+  margin-bottom: 32px;
+  gap: 16px;
 }
 
 .result-heading {
@@ -670,7 +681,47 @@ body {
 
 .result-btns {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  width: 100%;
+  gap: 12px;
+}
+
+.result-btns .btn {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .result-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+
+/* ─── Post Processing Panel ─── */
+.post-process-panel {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.post-process-panel .options-label {
+  margin-bottom: 16px;
+  display: block;
+}
+
+.post-process-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.color-transfer-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 /* ─── Comparison Slider ─── */

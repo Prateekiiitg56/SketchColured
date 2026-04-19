@@ -125,21 +125,6 @@
                 <span>✨ Colorize Now</span>
               </button>
               <button id="reset-btn" class="btn btn-outline">Change Image</button>
-
-              <div class="options-separator"></div>
-
-              <p class="options-label">ADVANCED</p>
-              <label class="switch-row">
-                <div class="switch">
-                  <input type="checkbox" id="color-transfer-toggle" />
-                  <span class="switch-track"></span>
-                </div>
-                <span class="switch-text">Color Transfer</span>
-              </label>
-              <div id="reference-upload-group" class="ref-group hidden">
-                <p class="ref-desc">Upload a reference image to transfer its color palette</p>
-                <input type="file" id="reference-input" accept="image/*" class="ref-file-input" />
-              </div>
             </div>
           </div>
         </div>
@@ -155,44 +140,78 @@
         <span class="label-text">RESULT</span>
       </div>
 
-      <div class="result-top">
-        <h2 class="result-heading">YOUR COLORIZED ARTWORK</h2>
-        <div class="result-btns">
-          <a id="download-btn" class="btn btn-accent" download="colorized.png">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Download
-          </a>
-          <button id="try-again-btn" class="btn btn-outline">Try Another</button>
-        </div>
-      </div>
+      <div class="result-layout">
 
-      <!-- Comparison slider -->
-      <div class="compare-wrap" id="compare-container">
-        <img id="result-color" class="compare-color" src="" alt="Colorized" />
-        <div class="compare-clip" id="compare-clip">
-          <img id="result-sketch" class="compare-sketch" src="" alt="Original" />
-        </div>
-        <div class="compare-handle" id="compare-handle">
-          <div class="handle-line"></div>
-          <div class="handle-knob">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
+        <!-- Image Slider Column -->
+        <div class="result-image-col">
+          <div class="compare-wrap" id="compare-container">
+            <img id="result-color" class="compare-color" src="" alt="Colorized" />
+            <div class="compare-clip" id="compare-clip">
+              <img id="result-sketch" class="compare-sketch" src="" alt="Original" />
+            </div>
+            <div class="compare-handle" id="compare-handle">
+              <div class="handle-line"></div>
+              <div class="handle-knob">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </div>
+              <div class="handle-line"></div>
+            </div>
+            <span class="compare-tag tag-left">ORIGINAL</span>
+            <span class="compare-tag tag-right">COLORIZED</span>
           </div>
-          <div class="handle-line"></div>
+          <p class="compare-hint">← Drag to compare →</p>
         </div>
-        <span class="compare-tag tag-left">ORIGINAL</span>
-        <span class="compare-tag tag-right">COLORIZED</span>
+
+        <!-- Controls Column -->
+        <div class="result-controls-col">
+          <div class="result-top">
+            <h2 class="result-heading">YOUR COLORIZED ARTWORK</h2>
+            <div class="result-btns">
+              <button id="upscale-btn" class="btn btn-accent">
+                ✨ Upscale (4x)
+              </button>
+              <a id="download-btn" class="btn btn-outline" download="colorized.png">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Download
+              </a>
+              <button id="try-again-btn" class="btn btn-outline">Try Another</button>
+            </div>
+          </div>
+
+          <!-- Post Processing Options -->
+          <div class="post-process-panel">
+            <p class="options-label">POST-PROCESSING</p>
+            <div class="post-process-controls">
+              <div class="color-transfer-wrap">
+                <label class="switch-row">
+                  <div class="switch">
+                    <input type="checkbox" id="color-transfer-toggle" />
+                    <span class="switch-track"></span>
+                  </div>
+                  <span class="switch-text">Color Transfer (Reinhard)</span>
+                </label>
+                <div id="reference-upload-group" class="ref-group hidden">
+                  <p class="ref-desc">Upload a reference image to transfer its color palette</p>
+                  <input type="file" id="reference-input" accept="image/*" class="ref-file-input" />
+                  <button id="apply-transfer-btn" class="btn btn-accent btn-large" style="margin-top: 10px;">Apply
+                    Transfer</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
-      <p class="compare-hint">← Drag to compare →</p>
     </div>
   </section>
 

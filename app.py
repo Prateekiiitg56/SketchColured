@@ -235,19 +235,29 @@ async def serve_frontend():
     return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
 
 
+from fastapi import Response
+
+
+def _img_response(img_np, filename="output.png"):
+    """Helper to convert a numpy RGB array to a PNG Response."""
+    output_img = PILImage.fromarray(img_np)
+    buf = io.BytesIO()
+    output_img.save(buf, format="PNG")
+    buf.seek(0)
+    return Response(
+        content=buf.getvalue(),
+        media_type="image/png",
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+    )
+
+
+# ─────────────────────────────────────────────
+# 1) /colorize — Raw GAN output only (256×256)
+# ─────────────────────────────────────────────
 @app.post("/colorize")
-async def colorize(
-    file: UploadFile = File(...),
-    reference_file: UploadFile = None,
-    use_color_transfer: str = Form("false")
-):
-    # Validate main file type
+async def colorize(file: UploadFile = File(...)):
     if file.content_type and not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Uploaded file must be an image.")
-
-    # Validate reference file type if provided
-    if reference_file is not None and reference_file.content_type and not reference_file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Reference file must be an image.")
 
     try:
         contents = await file.read()
@@ -264,56 +274,79 @@ async def colorize(
     output = output * 0.5 + 0.5
     output = output.clamp(0, 1)
 
-    # Convert tensor to numpy array for RealESRGAN
-    original_color_np = (output.squeeze(0).cpu().numpy().transpose(1, 2, 0) * 255.0).round().astype(np.uint8)
-    output_np = original_color_np.copy()
+    output_np = (output.squeeze(0).cpu().numpy().transpose(1, 2, 0) * 255.0).round().astype(np.uint8)
 
-            # Apply RealESRGAN Post-processing
-    if upsampler is not None:
-        try:
-            output_np, _ = upsampler.enhance(output_np, outscale=4)
-            
-            if use_color_transfer.lower() == "true":
-                # Histogram Color Transfer (Reinhard algorithm)
-                source_np = original_color_np
-                
-                # If the user uploaded a custom reference image, use its colors instead!
-                if reference_file is not None:
-                    try:
-                        ref_contents = await reference_file.read()
-                        ref_img = PILImage.open(io.BytesIO(ref_contents)).convert("RGB")
-                        # Resize reference to match target shape to standardize speed, or just use as is
-                        source_np = np.array(ref_img)
-                    except Exception as e:
-                        print(f"Failed to read reference image: {e}")
-                
-                source = cv2.cvtColor(source_np, cv2.COLOR_RGB2LAB).astype(np.float32)
-                target = cv2.cvtColor(output_np, cv2.COLOR_RGB2LAB).astype(np.float32)
-                
-                s_mean, s_std = cv2.meanStdDev(source)
-                t_mean, t_std = cv2.meanStdDev(target)
-                
-                # Transfer all color channels
-                for i in range(3):
-                    std_ratio = (s_std[i][0] / t_std[i][0]) if t_std[i][0] != 0 else 0
-                    target[:,:,i] = ((target[:,:,i] - t_mean[i][0]) * std_ratio) + s_mean[i][0]
-                    
-                target = np.clip(target, 0, 255).astype(np.uint8)
-                output_np = cv2.cvtColor(target, cv2.COLOR_LAB2RGB)
-            
-        except Exception as e:
-            print(f"[Error] RealESRGAN enhancement or color transfer failed: {e}")
+    return _img_response(output_np, "colorized.png")
 
-    # Convert back to PIL Image
-    output_img = PILImage.fromarray(output_np)
-    
-    buf = io.BytesIO()
-    output_img.save(buf, format="PNG")
-    buf.seek(0)
 
-    from fastapi import Response
-    return Response(
-        content=buf.getvalue(),
-        media_type="image/png",
-        headers={"Content-Disposition": 'inline; filename="colorized.png"'},
-    )
+# ─────────────────────────────────────────────
+# 2) /upscale — Real-ESRGAN 4× super-resolution
+# ─────────────────────────────────────────────
+@app.post("/upscale")
+async def upscale(file: UploadFile = File(...)):
+    if upsampler is None:
+        raise HTTPException(status_code=503, detail="Real-ESRGAN model is not loaded.")
+
+    if file.content_type and not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Uploaded file must be an image.")
+
+    try:
+        contents = await file.read()
+        img = PILImage.open(io.BytesIO(contents)).convert("RGB")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Could not read image file.")
+
+    img_np = np.array(img)
+
+    try:
+        output_np, _ = upsampler.enhance(img_np, outscale=4)
+    except Exception as e:
+        print(f"[Error] Real-ESRGAN upscale failed: {e}")
+        raise HTTPException(status_code=500, detail="Upscaling failed.")
+
+    return _img_response(output_np, "upscaled.png")
+
+
+# ─────────────────────────────────────────────
+# 3) /color-transfer — Reinhard histogram transfer
+# ─────────────────────────────────────────────
+@app.post("/color-transfer")
+async def color_transfer(
+    file: UploadFile = File(...),
+    reference_file: UploadFile = File(...),
+):
+    if file.content_type and not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Uploaded file must be an image.")
+    if reference_file.content_type and not reference_file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Reference file must be an image.")
+
+    try:
+        contents = await file.read()
+        img = PILImage.open(io.BytesIO(contents)).convert("RGB")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Could not read source image.")
+
+    try:
+        ref_contents = await reference_file.read()
+        ref_img = PILImage.open(io.BytesIO(ref_contents)).convert("RGB")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Could not read reference image.")
+
+    target_np = np.array(img)
+    source_np = np.array(ref_img)
+
+    # Reinhard color transfer in CIELAB space
+    source = cv2.cvtColor(source_np, cv2.COLOR_RGB2LAB).astype(np.float32)
+    target = cv2.cvtColor(target_np, cv2.COLOR_RGB2LAB).astype(np.float32)
+
+    s_mean, s_std = cv2.meanStdDev(source)
+    t_mean, t_std = cv2.meanStdDev(target)
+
+    for i in range(3):
+        std_ratio = (s_std[i][0] / t_std[i][0]) if t_std[i][0] != 0 else 0
+        target[:, :, i] = ((target[:, :, i] - t_mean[i][0]) * std_ratio) + s_mean[i][0]
+
+    target = np.clip(target, 0, 255).astype(np.uint8)
+    output_np = cv2.cvtColor(target, cv2.COLOR_LAB2RGB)
+
+    return _img_response(output_np, "color_transferred.png")

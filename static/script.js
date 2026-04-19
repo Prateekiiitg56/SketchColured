@@ -17,6 +17,9 @@ const colorTransferToggle = document.getElementById('color-transfer-toggle');
 const referenceUploadGroup = document.getElementById('reference-upload-group');
 const referenceInput = document.getElementById('reference-input');
 
+const upscaleBtn = document.getElementById('upscale-btn');
+const applyTransferBtn = document.getElementById('apply-transfer-btn');
+
 const loadingOverlay = document.getElementById('loading-overlay');
 const sampleGrid = document.getElementById('sample-grid');
 const compareClip = document.getElementById('compare-clip');
@@ -102,21 +105,19 @@ function resetUpload() {
 resetBtn.addEventListener('click', resetUpload);
 tryAgainBtn.addEventListener('click', resetUpload);
 
-// ─── API Call ───
+// ─── API Calls ───
+
+// 1. Colorize (Raw GAN)
 colorizeBtn.addEventListener('click', async () => {
     if (!uploadedFile) return;
 
     loadingOverlay.classList.remove('hidden');
+    document.querySelector('.loader-label').textContent = 'COLORIZING';
+    document.querySelector('.loader-sub').textContent = 'Our AI model is painting your sketch...';
     colorizeBtn.disabled = true;
 
     const formData = new FormData();
     formData.append('file', uploadedFile);
-    const useColorTransfer = colorTransferToggle.checked;
-    formData.append('use_color_transfer', useColorTransfer);
-
-    if (useColorTransfer && referenceInput.files[0]) {
-        formData.append('reference_file', referenceInput.files[0]);
-    }
 
     try {
         const resp = await fetch('/colorize', { method: 'POST', body: formData });
@@ -138,6 +139,9 @@ colorizeBtn.addEventListener('click', async () => {
         resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         setSlider(50);
 
+        // Reset upscale button if it was disabled
+        if (upscaleBtn) upscaleBtn.disabled = false;
+
     } catch (err) {
         alert('Colorization failed: ' + err.message);
     } finally {
@@ -145,6 +149,81 @@ colorizeBtn.addEventListener('click', async () => {
         colorizeBtn.disabled = false;
     }
 });
+
+// 2. Upscale (Real-ESRGAN)
+if (upscaleBtn) {
+    upscaleBtn.addEventListener('click', async () => {
+        if (!resultColor.src) return;
+
+        loadingOverlay.classList.remove('hidden');
+        document.querySelector('.loader-label').textContent = 'UPSCALING';
+        document.querySelector('.loader-sub').textContent = 'Enhancing resolution with Real-ESRGAN...';
+        upscaleBtn.disabled = true;
+
+        try {
+            const imgResp = await fetch(resultColor.src);
+            const imgBlob = await imgResp.blob();
+
+            const formData = new FormData();
+            formData.append('file', imgBlob, 'current.png');
+
+            const resp = await fetch('/upscale', { method: 'POST', body: formData });
+            if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+
+            const resultBlob = await resp.blob();
+            const colorURL = URL.createObjectURL(resultBlob);
+
+            resultColor.src = colorURL;
+            downloadBtn.href = colorURL;
+
+        } catch (err) {
+            alert('Upscaling failed: ' + err.message);
+            upscaleBtn.disabled = false;
+        } finally {
+            loadingOverlay.classList.add('hidden');
+        }
+    });
+}
+
+// 3. Color Transfer (Reinhard)
+if (applyTransferBtn) {
+    applyTransferBtn.addEventListener('click', async () => {
+        if (!resultColor.src) return;
+        if (!referenceInput.files[0]) {
+            alert('Please upload a reference image first.');
+            return;
+        }
+
+        loadingOverlay.classList.remove('hidden');
+        document.querySelector('.loader-label').textContent = 'TRANSFERRING COLOR';
+        document.querySelector('.loader-sub').textContent = 'Applying palette from reference image...';
+        applyTransferBtn.disabled = true;
+
+        try {
+            const imgResp = await fetch(resultColor.src);
+            const imgBlob = await imgResp.blob();
+
+            const formData = new FormData();
+            formData.append('file', imgBlob, 'current.png');
+            formData.append('reference_file', referenceInput.files[0]);
+
+            const resp = await fetch('/color-transfer', { method: 'POST', body: formData });
+            if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+
+            const resultBlob = await resp.blob();
+            const colorURL = URL.createObjectURL(resultBlob);
+
+            resultColor.src = colorURL;
+            downloadBtn.href = colorURL;
+
+        } catch (err) {
+            alert('Color transfer failed: ' + err.message);
+        } finally {
+            loadingOverlay.classList.add('hidden');
+            applyTransferBtn.disabled = false;
+        }
+    });
+}
 
 // ─── Before/After Slider ───
 function setSlider(pct) {
