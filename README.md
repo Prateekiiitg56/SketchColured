@@ -26,7 +26,7 @@ Python 3.8+ is recommended. Ensure you have the trained weights in the root dire
 ### 2. Installation
 Clone the repository and install the backend dependencies:
 ```bash
-git clone https://github.com/Username/SketchColor.git
+git clone https://github.com/Prateekiiitg56/SketchColured.git
 cd SketchColor
 pip install -r requirements.txt
 ```

@@ -1,4 +1,4 @@
-// DOM elements
+// ─── DOM Elements ───
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-input');
 const browseLink = document.getElementById('browse-link');
@@ -24,12 +24,15 @@ const compareClip = document.getElementById('compare-clip');
 const compareHandle = document.getElementById('compare-handle');
 const compareWrap = document.getElementById('compare-container');
 
-// State
+// ─── State ───
 let uploadedFile = null;
 let sketchDataURL = null;
 
-// --- Upload Interaction ---
-browseLink.addEventListener('click', () => fileInput.click());
+// ─── Upload Interactions ───
+browseLink.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fileInput.click();
+});
 dropZone.addEventListener('click', () => fileInput.click());
 
 dropZone.addEventListener('dragover', (e) => {
@@ -49,7 +52,7 @@ fileInput.addEventListener('change', () => {
 
 function handleFile(file) {
     if (!file.type.startsWith('image/')) {
-        alert('Please upload an image file (PNG, JPG, WEBP).');
+        showToast('Please upload an image file (PNG, JPG, WEBP).', 'error');
         return;
     }
     uploadedFile = file;
@@ -63,7 +66,7 @@ function handleFile(file) {
     reader.readAsDataURL(file);
 }
 
-// --- Toggle Logic ---
+// ─── Toggle Logic ───
 colorTransferToggle.addEventListener('change', () => {
     if (colorTransferToggle.checked) {
         referenceUploadGroup.classList.remove('hidden');
@@ -73,7 +76,7 @@ colorTransferToggle.addEventListener('change', () => {
     }
 });
 
-// --- Reset / Try Again ---
+// ─── Reset / Try Again ───
 function resetUpload() {
     uploadedFile = null;
     sketchDataURL = null;
@@ -81,13 +84,15 @@ function resetUpload() {
     previewState.classList.add('hidden');
     resultSection.classList.add('hidden');
     dropZone.classList.remove('hidden');
+    colorTransferToggle.checked = false;
+    referenceUploadGroup.classList.add('hidden');
+    referenceInput.value = '';
 }
 
 resetBtn.addEventListener('click', resetUpload);
 tryAgainBtn.addEventListener('click', resetUpload);
 
-
-// --- API Call ---
+// ─── API Call ───
 colorizeBtn.addEventListener('click', async () => {
     if (!uploadedFile) return;
 
@@ -121,25 +126,26 @@ colorizeBtn.addEventListener('click', async () => {
         // Show result
         resultSection.classList.remove('hidden');
 
-        // Hide preview state entirely once colorized
+        // Hide preview state
         previewState.classList.add('hidden');
 
-        // Smooth scroll down to result
+        // Smooth scroll to result
         resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
         // Reset slider to center
         setSlider(50);
 
+        showToast('Colorization complete! 🎨', 'success');
+
     } catch (err) {
-        alert('Model inference failed: ' + err.message);
+        showToast('Colorization failed: ' + err.message, 'error');
     } finally {
         loadingOverlay.classList.add('hidden');
         colorizeBtn.disabled = false;
     }
 });
 
-
-// --- Slider Logic ---
+// ─── Before/After Slider ───
 function setSlider(pct) {
     compareClip.style.width = pct + '%';
     compareHandle.style.left = pct + '%';
@@ -170,15 +176,86 @@ function onDrag(e) {
     setSlider(pct);
 }
 
-// --- Training Gallery ---
-const epochs = [187, 188, 189, 190, 191, 192, 193, 194];
+// ─── Training Gallery ───
+// Show the latest epochs from the evaluation folder
+// Check both /static/samples and latestOutput evaluation  
+function loadGallery() {
+    // Try the latest training output first (epochs 390-399), fallback to static samples
+    const latestEpochs = [];
+    for (let i = 395; i <= 399; i++) latestEpochs.push(i);
+    for (let i = 390; i <= 394; i++) latestEpochs.push(i);
 
-epochs.forEach((ep) => {
-    const item = document.createElement('div');
-    item.className = 'sample-item';
-    item.innerHTML = `
-    <img src="/static/samples/y_gen_${ep}.png" alt="Epoch ${ep}" loading="lazy" onerror="this.closest('.sample-item').remove()" />
-    <div class="epoch-label">Epoch ${ep}</div>
-  `;
-    sampleGrid.appendChild(item);
-});
+    // Also add older milestone epochs from static samples
+    const milestoneEpochs = [171, 175, 180, 185, 190, 194];
+
+    // Load latest training epochs from evaluation folder
+    latestEpochs.forEach((ep) => {
+        const item = document.createElement('div');
+        item.className = 'sample-item';
+        item.innerHTML = `
+      <img src="/static/samples/y_gen_${ep}.png" alt="Epoch ${ep}" loading="lazy"
+           onerror="this.closest('.sample-item').remove()" />
+      <div class="epoch-label">Epoch ${ep}</div>
+    `;
+        sampleGrid.appendChild(item);
+    });
+
+    // Load milestone epochs
+    milestoneEpochs.forEach((ep) => {
+        const item = document.createElement('div');
+        item.className = 'sample-item';
+        item.innerHTML = `
+      <img src="/static/samples/y_gen_${ep}.png" alt="Epoch ${ep}" loading="lazy"
+           onerror="this.closest('.sample-item').remove()" />
+      <div class="epoch-label">Epoch ${ep}</div>
+    `;
+        sampleGrid.appendChild(item);
+    });
+}
+
+loadGallery();
+
+// ─── Toast Notification ───
+function showToast(message, type = 'info') {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+
+    Object.assign(toast.style, {
+        position: 'fixed',
+        bottom: '24px',
+        right: '24px',
+        padding: '14px 24px',
+        borderRadius: '12px',
+        fontSize: '0.88rem',
+        fontWeight: '600',
+        fontFamily: "'Outfit', sans-serif",
+        zIndex: '9999',
+        animation: 'fadeInUp 0.4s ease-out',
+        maxWidth: '380px',
+        backdropFilter: 'blur(12px)',
+    });
+
+    if (type === 'success') {
+        toast.style.background = 'rgba(52, 211, 153, 0.15)';
+        toast.style.color = '#34d399';
+        toast.style.border = '1px solid rgba(52, 211, 153, 0.3)';
+    } else if (type === 'error') {
+        toast.style.background = 'rgba(248, 113, 113, 0.15)';
+        toast.style.color = '#f87171';
+        toast.style.border = '1px solid rgba(248, 113, 113, 0.3)';
+    } else {
+        toast.style.background = 'rgba(167, 139, 250, 0.15)';
+        toast.style.color = '#a78bfa';
+        toast.style.border = '1px solid rgba(167, 139, 250, 0.3)';
+    }
+
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.animation = 'fadeInUp 0.3s ease-in reverse forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+}
