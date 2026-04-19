@@ -315,3 +315,40 @@ document.querySelectorAll('.section-label, .section-title-xl, .how-card, .sample
 const style = document.createElement('style');
 style.textContent = '.revealed { opacity: 1 !important; transform: translateY(0) !important; }';
 document.head.appendChild(style);
+
+// ─── Download Logic ───
+const realDownloadBtn = document.getElementById('download-btn');
+if (realDownloadBtn) {
+    realDownloadBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!resultColor.src) return;
+
+        try {
+            console.log("Triggering Base64 robust download for", resultColor.src);
+            const response = await fetch(resultColor.src);
+            if (!response.ok) throw new Error("Could not fetch the image");
+
+            const blob = await response.blob();
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = reader.result; // This is a data:image/png;base64 string
+                a.download = 'Anime-Colorized-Output.png';
+                document.body.appendChild(a);
+                a.click();
+
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                }, 100);
+            };
+            reader.readAsDataURL(blob);
+
+        } catch (err) {
+            console.error('Download error:', err);
+            alert('Download failed! Try right-clicking the image and selecting "Save image as..."');
+        }
+    });
+}
+
