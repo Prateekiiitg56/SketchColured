@@ -9,230 +9,278 @@
     content="Transform your black-and-white anime sketches into vibrant, full-color artwork using our AI-powered colorization tool." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 
 <body>
+
   <!-- Loading overlay -->
   <div id="loading-overlay" class="hidden">
     <div class="loader-inner">
-      <div class="loader-ring">
-        <div class="ring"></div>
-        <div class="ring"></div>
-        <div class="ring"></div>
+      <div class="loader-bar">
+        <div class="loader-fill"></div>
       </div>
-      <p class="loader-label">Colorizing your sketch...</p>
-      <p class="loader-sub">Our AI is working its magic ✨</p>
+      <p class="loader-label">COLORIZING</p>
+      <p class="loader-sub">Our AI model is painting your sketch...</p>
     </div>
   </div>
 
-  <!-- Navbar -->
-  <nav class="nav" id="navbar">
-    <div class="nav-left">
-      <span class="nav-logo">🎨</span>
-      <span class="nav-brand">SketchColured</span>
-    </div>
-    <div class="nav-right">
+  <!-- ─── Navigation ─── -->
+  <nav class="nav">
+    <a href="/" class="nav-brand">SKETCH<span class="brand-accent">COLURED</span></a>
+    <div class="nav-links">
+      <a href="#upload-section" class="nav-item">COLORIZE</a>
+      <a href="#gallery-section" class="nav-item">GALLERY</a>
+      <a href="#how-section" class="nav-item">HOW IT WORKS</a>
       <a href="https://github.com/Prateekiiitg56/SketchColured" target="_blank" rel="noopener noreferrer"
-        class="nav-link" title="View on GitHub">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        class="nav-item nav-github">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <path
             d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
         </svg>
-        <span>GitHub</span>
+        GITHUB
       </a>
     </div>
+    <button class="nav-menu-btn" id="menu-toggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
 
-  <!-- Animated background blobs -->
-  <div class="bg-blobs" aria-hidden="true">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-  </div>
-
-  <main class="main">
-
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-badge">AI-Powered Colorization</div>
-      <h1 class="hero-title">Turn your sketches into <span class="gradient-text">colorful art</span></h1>
-      <p class="hero-sub">Upload any black-and-white anime sketch and our trained AI model will bring it to life with
-        vibrant colors in seconds.</p>
-    </section>
-
-    <!-- How it works -->
-    <section class="steps-strip">
-      <div class="step-card">
-        <div class="step-icon">📤</div>
-        <div class="step-num">Step 1</div>
-        <div class="step-text">Upload sketch</div>
+  <!-- ─── Hero Section ─── -->
+  <header class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <p class="hero-eyebrow">AI-POWERED COLORIZATION</p>
+        <h1 class="hero-title">SKETCH<br /><span class="hero-title-outline">TO</span> COLOR</h1>
+        <p class="hero-desc">Upload any black-and-white anime sketch and our trained AI model will bring it to life
+          with vibrant colors in seconds.</p>
+        <a href="#upload-section" class="btn btn-accent">Start Colorizing</a>
       </div>
-      <div class="step-arrow">→</div>
-      <div class="step-card">
-        <div class="step-icon">🤖</div>
-        <div class="step-num">Step 2</div>
-        <div class="step-text">AI processes it</div>
-      </div>
-      <div class="step-arrow">→</div>
-      <div class="step-card">
-        <div class="step-icon">🎨</div>
-        <div class="step-num">Step 3</div>
-        <div class="step-text">Download result</div>
-      </div>
-    </section>
-
-    <!-- Upload Zone -->
-    <section id="upload-section" class="glass-card upload-card">
-      <div class="upload-zone" id="drop-zone">
-        <div class="upload-icon-ring">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" y1="3" x2="12" y2="15" />
-          </svg>
+      <div class="hero-visual">
+        <div class="hero-img-grid">
+          <img src="/static/samples/y_gen_399.png" alt="Sample colorization" class="hero-sample hero-sample-1" />
+          <img src="/static/samples/y_gen_397.png" alt="Sample colorization" class="hero-sample hero-sample-2" />
+          <img src="/static/samples/y_gen_395.png" alt="Sample colorization" class="hero-sample hero-sample-3" />
         </div>
-        <p class="upload-primary">Drag & drop your sketch here</p>
-        <p class="upload-secondary">or <span id="browse-link" class="link">click to browse</span></p>
-        <p class="upload-formats">Supports PNG, JPG, WEBP</p>
-        <input type="file" id="file-input" accept="image/*" hidden />
-      </div>
-
-      <!-- Preview state (hidden until file chosen) -->
-      <div id="preview-state" class="preview-state hidden">
-        <div class="preview-card">
-          <div class="preview-image-wrap">
-            <img id="sketch-thumb" src="" alt="Your uploaded sketch" class="preview-thumb" />
-            <div class="preview-overlay-label">Your Sketch</div>
-          </div>
-          <div class="preview-controls">
-            <button id="colorize-btn" class="btn btn-primary btn-lg">
-              <span class="btn-icon">✨</span> Colorize Now
-            </button>
-            <button id="reset-btn" class="btn btn-ghost">Change Image</button>
-
-            <div class="options-divider"></div>
-            <p class="options-title">Advanced Options</p>
-
-            <label class="toggle-wrap" title="Matches high-res colors to a reference image, or the original GAN output">
-              <div class="toggle-track">
-                <input type="checkbox" id="color-transfer-toggle" />
-                <div class="toggle-slider"></div>
-              </div>
-              <span class="toggle-label">Color Transfer</span>
-            </label>
-
-            <div id="reference-upload-group" class="ref-upload hidden">
-              <p class="ref-label">Reference image (optional)</p>
-              <p class="ref-hint">Upload an image whose color palette you want to apply</p>
-              <input type="file" id="reference-input" accept="image/*" class="ref-input" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Result section (hidden until result ready) -->
-    <section id="result-section" class="hidden">
-      <div class="result-card glass-card">
-        <div class="result-header">
-          <h2 class="result-title">🎉 Your Colorized Result</h2>
-          <div class="result-actions">
-            <a id="download-btn" class="btn btn-primary" download="colorized.png">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              Download
-            </a>
-            <button id="try-again-btn" class="btn btn-ghost">Try Another</button>
-          </div>
-        </div>
-
-        <!-- Before/After slider -->
-        <div class="compare-wrap" id="compare-container">
-          <img id="result-color" class="compare-color" src="" alt="Colorized output" />
-          <div class="compare-clip" id="compare-clip">
-            <img id="result-sketch" class="compare-sketch" src="" alt="Original sketch" />
-          </div>
-          <div class="compare-handle" id="compare-handle">
-            <div class="handle-track"></div>
-            <div class="handle-knob">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </div>
-            <div class="handle-track"></div>
-          </div>
-          <span class="compare-lbl lbl-left">Original</span>
-          <span class="compare-lbl lbl-right">Colorized</span>
-        </div>
-        <p class="compare-hint">← Drag the slider to compare →</p>
-      </div>
-    </section>
-
-    <!-- Training progress gallery -->
-    <section class="gallery-section">
-      <div class="section-header">
-        <h2 class="section-heading">📊 Training Progress Gallery</h2>
-        <p class="section-sub">Watch how our AI learned to color sketches over 400 training epochs</p>
-      </div>
-      <div class="sample-grid" id="sample-grid"></div>
-    </section>
-
-    <!-- Tech stack -->
-    <section class="tech-section">
-      <h2 class="section-heading">🧠 How It Works</h2>
-      <div class="tech-grid">
-        <div class="tech-card glass-card-sm">
-          <div class="tech-icon">⚡</div>
-          <h3>Attention U-Net Generator</h3>
-          <p>A deep encoder-decoder network with attention gates that focuses on important sketch regions</p>
-        </div>
-        <div class="tech-card glass-card-sm">
-          <div class="tech-icon">🔍</div>
-          <h3>PatchGAN Discriminator</h3>
-          <p>Evaluates local patches to ensure realistic color patterns and textures across the image</p>
-        </div>
-        <div class="tech-card glass-card-sm">
-          <div class="tech-icon">🖼️</div>
-          <h3>Real-ESRGAN Upscaler</h3>
-          <p>Boosts the output from 256×256 to 1024×1024 with crystal-clear AI super-resolution</p>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-left">
-        <span class="footer-brand">🎨 SketchColured</span>
-        <p class="footer-tagline">Attention U-Net cGAN — Trained on Anime Sketch Colorization Pair Dataset</p>
-      </div>
-      <div class="footer-right">
-        <a href="https://github.com/Prateekiiitg56/SketchColured" target="_blank" rel="noopener noreferrer"
-          class="footer-link">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path
-              d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
-          </svg>
-          View on GitHub
-        </a>
       </div>
     </div>
-    <div class="footer-bottom">
-      <p>Made with ❤️ by <a href="https://github.com/Prateekiiitg56" target="_blank"
-          rel="noopener noreferrer">Prateek</a> — Built with PyTorch, FastAPI & Real-ESRGAN</p>
+    <div class="hero-scroll-hint">
+      <span>SCROLL</span>
+      <div class="scroll-line"></div>
+    </div>
+  </header>
+
+  <!-- ─── About Strip ─── -->
+  <section class="about-strip">
+    <div class="container">
+      <p class="about-eyebrow">WHAT IS SKETCHCOLURED?</p>
+      <p class="about-text">
+        SketchColured uses a custom <strong>Conditional GAN</strong> (Generative Adversarial Network) with an
+        <strong>Attention U-Net</strong> generator, trained on over <strong>400 epochs</strong> of anime artwork
+        to automatically colorize your line art. The output is then super-resolved to
+        <strong>4× resolution</strong> using Real-ESRGAN for stunning, high-quality results.
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── Upload / Colorize Section ─── -->
+  <section class="colorize-section" id="upload-section">
+    <div class="container">
+      <div class="section-label">
+        <span class="label-num">01</span>
+        <span class="label-text">COLORIZE</span>
+      </div>
+
+      <h2 class="section-title-xl">UPLOAD YOUR<br />SKETCH</h2>
+
+      <div class="upload-area">
+        <!-- Drop Zone -->
+        <div class="upload-zone" id="drop-zone">
+          <div class="upload-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+          </div>
+          <p class="upload-title">Drag & drop your sketch here</p>
+          <p class="upload-or">or <span id="browse-link" class="text-link">click to browse</span></p>
+          <p class="upload-hint">PNG, JPG, WEBP supported</p>
+          <input type="file" id="file-input" accept="image/*" hidden />
+        </div>
+
+        <!-- Preview State -->
+        <div id="preview-state" class="preview-state hidden">
+          <div class="preview-layout">
+            <div class="preview-img-wrap">
+              <img id="sketch-thumb" src="" alt="Uploaded sketch" class="preview-img" />
+              <span class="preview-badge">YOUR SKETCH</span>
+            </div>
+            <div class="preview-actions">
+              <button id="colorize-btn" class="btn btn-accent btn-large">
+                <span>✨ Colorize Now</span>
+              </button>
+              <button id="reset-btn" class="btn btn-outline">Change Image</button>
+
+              <div class="options-separator"></div>
+
+              <p class="options-label">ADVANCED</p>
+              <label class="switch-row">
+                <div class="switch">
+                  <input type="checkbox" id="color-transfer-toggle" />
+                  <span class="switch-track"></span>
+                </div>
+                <span class="switch-text">Color Transfer</span>
+              </label>
+              <div id="reference-upload-group" class="ref-group hidden">
+                <p class="ref-desc">Upload a reference image to transfer its color palette</p>
+                <input type="file" id="reference-input" accept="image/*" class="ref-file-input" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Result Section ─── -->
+  <section id="result-section" class="result-section hidden">
+    <div class="container">
+      <div class="section-label">
+        <span class="label-num">✓</span>
+        <span class="label-text">RESULT</span>
+      </div>
+
+      <div class="result-top">
+        <h2 class="result-heading">YOUR COLORIZED ARTWORK</h2>
+        <div class="result-btns">
+          <a id="download-btn" class="btn btn-accent" download="colorized.png">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download
+          </a>
+          <button id="try-again-btn" class="btn btn-outline">Try Another</button>
+        </div>
+      </div>
+
+      <!-- Comparison slider -->
+      <div class="compare-wrap" id="compare-container">
+        <img id="result-color" class="compare-color" src="" alt="Colorized" />
+        <div class="compare-clip" id="compare-clip">
+          <img id="result-sketch" class="compare-sketch" src="" alt="Original" />
+        </div>
+        <div class="compare-handle" id="compare-handle">
+          <div class="handle-line"></div>
+          <div class="handle-knob">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+          <div class="handle-line"></div>
+        </div>
+        <span class="compare-tag tag-left">ORIGINAL</span>
+        <span class="compare-tag tag-right">COLORIZED</span>
+      </div>
+      <p class="compare-hint">← Drag to compare →</p>
+    </div>
+  </section>
+
+  <!-- ─── Gallery Section ─── -->
+  <section class="gallery-section" id="gallery-section">
+    <div class="container">
+      <div class="section-label">
+        <span class="label-num">02</span>
+        <span class="label-text">GALLERY</span>
+      </div>
+
+      <h2 class="section-title-xl">TRAINING<br />PROGRESS</h2>
+      <p class="gallery-desc">Watch how our AI learned to color over 400 epochs of training</p>
+
+      <div class="gallery-grid" id="sample-grid"></div>
+
+      <p class="gallery-note">Showing samples from Epoch 171 → 399</p>
+    </div>
+  </section>
+
+  <!-- ─── How It Works ─── -->
+  <section class="how-section" id="how-section">
+    <div class="container">
+      <div class="section-label">
+        <span class="label-num">03</span>
+        <span class="label-text">THE TECH</span>
+      </div>
+
+      <h2 class="section-title-xl">HOW IT<br />WORKS</h2>
+
+      <div class="how-grid">
+        <div class="how-card">
+          <div class="how-num">01</div>
+          <h3 class="how-title">ATTENTION U-NET</h3>
+          <p class="how-desc">Our deep encoder-decoder generator uses attention gates at every skip connection to
+            precisely focus on sketch lines and boundaries.</p>
+        </div>
+        <div class="how-card">
+          <div class="how-num">02</div>
+          <h3 class="how-title">PATCHGAN DISC.</h3>
+          <p class="how-desc">A PatchGAN discriminator with spectral normalization evaluates local patches across the
+            image to enforce realistic color textures.</p>
+        </div>
+        <div class="how-card">
+          <div class="how-num">03</div>
+          <h3 class="how-title">REAL-ESRGAN</h3>
+          <p class="how-desc">The 256×256 output is upscaled to 1024×1024 with Real-ESRGAN anime weights, producing
+            crystal-clear, print-ready artwork.</p>
+        </div>
+        <div class="how-card">
+          <div class="how-num">04</div>
+          <h3 class="how-title">COLOR TRANSFER</h3>
+          <p class="how-desc">Optionally apply the Reinhard histogram color transfer algorithm to shift the color
+            palette to match any reference image.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Footer ─── -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="footer-logo">SKETCH<span class="brand-accent">COLURED</span></span>
+        </div>
+        <div class="footer-social">
+          <a href="https://github.com/Prateekiiitg56/SketchColured" target="_blank" rel="noopener noreferrer"
+            class="social-link" title="GitHub">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="#upload-section">COLORIZE</a>
+        <a href="#gallery-section">GALLERY</a>
+        <a href="#how-section">HOW IT WORKS</a>
+        <a href="https://github.com/Prateekiiitg56/SketchColured" target="_blank" rel="noopener noreferrer">GITHUB
+          REPO</a>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 SketchColured - Made by <a href="https://github.com/Prateekiiitg56" target="_blank"
+            rel="noopener noreferrer">Prateek</a></p>
+        <p class="footer-tech">Built with PyTorch · FastAPI · Real-ESRGAN</p>
+      </div>
     </div>
   </footer>
 

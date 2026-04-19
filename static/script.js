@@ -2,7 +2,6 @@
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-input');
 const browseLink = document.getElementById('browse-link');
-const uploadSection = document.getElementById('upload-section');
 const previewState = document.getElementById('preview-state');
 const sketchThumb = document.getElementById('sketch-thumb');
 const colorizeBtn = document.getElementById('colorize-btn');
@@ -23,10 +22,19 @@ const sampleGrid = document.getElementById('sample-grid');
 const compareClip = document.getElementById('compare-clip');
 const compareHandle = document.getElementById('compare-handle');
 const compareWrap = document.getElementById('compare-container');
+const menuToggle = document.getElementById('menu-toggle');
 
 // ─── State ───
 let uploadedFile = null;
 let sketchDataURL = null;
+
+// ─── Mobile Menu ───
+if (menuToggle) {
+    menuToggle.addEventListener('click', () => {
+        const navLinks = document.querySelector('.nav-links');
+        navLinks.classList.toggle('nav-open');
+    });
+}
 
 // ─── Upload Interactions ───
 browseLink.addEventListener('click', (e) => {
@@ -39,7 +47,9 @@ dropZone.addEventListener('dragover', (e) => {
     e.preventDefault();
     dropZone.classList.add('drag-over');
 });
+
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+
 dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
@@ -52,7 +62,7 @@ fileInput.addEventListener('change', () => {
 
 function handleFile(file) {
     if (!file.type.startsWith('image/')) {
-        showToast('Please upload an image file (PNG, JPG, WEBP).', 'error');
+        alert('Please upload an image file (PNG, JPG, WEBP).');
         return;
     }
     uploadedFile = file;
@@ -118,27 +128,18 @@ colorizeBtn.addEventListener('click', async () => {
         const blob = await resp.blob();
         const colorURL = URL.createObjectURL(blob);
 
-        // Set slider images
         resultColor.src = colorURL;
         resultSketch.src = sketchDataURL;
         downloadBtn.href = colorURL;
 
-        // Show result
         resultSection.classList.remove('hidden');
-
-        // Hide preview state
         previewState.classList.add('hidden');
 
-        // Smooth scroll to result
         resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        // Reset slider to center
         setSlider(50);
 
-        showToast('Colorization complete! 🎨', 'success');
-
     } catch (err) {
-        showToast('Colorization failed: ' + err.message, 'error');
+        alert('Colorization failed: ' + err.message);
     } finally {
         loadingOverlay.classList.add('hidden');
         colorizeBtn.disabled = false;
@@ -177,35 +178,20 @@ function onDrag(e) {
 }
 
 // ─── Training Gallery ───
-// Show the latest epochs from the evaluation folder
-// Check both /static/samples and latestOutput evaluation  
 function loadGallery() {
-    // Try the latest training output first (epochs 390-399), fallback to static samples
-    const latestEpochs = [];
-    for (let i = 395; i <= 399; i++) latestEpochs.push(i);
-    for (let i = 390; i <= 394; i++) latestEpochs.push(i);
+    // Show latest epochs first (most impressive results), then milestones
+    const epochs = [
+        // Latest training results
+        399, 398, 397, 396, 395, 394, 393, 392, 391, 390,
+        // Milestone epochs showing training progression
+        194, 190, 185, 180, 175, 171
+    ];
 
-    // Also add older milestone epochs from static samples
-    const milestoneEpochs = [171, 175, 180, 185, 190, 194];
-
-    // Load latest training epochs from evaluation folder
-    latestEpochs.forEach((ep) => {
+    epochs.forEach((ep) => {
         const item = document.createElement('div');
         item.className = 'sample-item';
         item.innerHTML = `
-      <img src="/static/samples/y_gen_${ep}.png" alt="Epoch ${ep}" loading="lazy"
-           onerror="this.closest('.sample-item').remove()" />
-      <div class="epoch-label">Epoch ${ep}</div>
-    `;
-        sampleGrid.appendChild(item);
-    });
-
-    // Load milestone epochs
-    milestoneEpochs.forEach((ep) => {
-        const item = document.createElement('div');
-        item.className = 'sample-item';
-        item.innerHTML = `
-      <img src="/static/samples/y_gen_${ep}.png" alt="Epoch ${ep}" loading="lazy"
+      <img src="/static/samples/y_gen_${ep}.png" alt="Epoch ${ep} output" loading="lazy"
            onerror="this.closest('.sample-item').remove()" />
       <div class="epoch-label">Epoch ${ep}</div>
     `;
@@ -215,47 +201,38 @@ function loadGallery() {
 
 loadGallery();
 
-// ─── Toast Notification ───
-function showToast(message, type = 'info') {
-    const existing = document.querySelector('.toast');
-    if (existing) existing.remove();
-
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-
-    Object.assign(toast.style, {
-        position: 'fixed',
-        bottom: '24px',
-        right: '24px',
-        padding: '14px 24px',
-        borderRadius: '12px',
-        fontSize: '0.88rem',
-        fontWeight: '600',
-        fontFamily: "'Outfit', sans-serif",
-        zIndex: '9999',
-        animation: 'fadeInUp 0.4s ease-out',
-        maxWidth: '380px',
-        backdropFilter: 'blur(12px)',
+// ─── Smooth Scroll for Nav Links ───
+document.querySelectorAll('.nav-item[href^="#"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        // Close mobile menu if open
+        const navLinks = document.querySelector('.nav-links');
+        navLinks.classList.remove('nav-open');
     });
+});
 
-    if (type === 'success') {
-        toast.style.background = 'rgba(52, 211, 153, 0.15)';
-        toast.style.color = '#34d399';
-        toast.style.border = '1px solid rgba(52, 211, 153, 0.3)';
-    } else if (type === 'error') {
-        toast.style.background = 'rgba(248, 113, 113, 0.15)';
-        toast.style.color = '#f87171';
-        toast.style.border = '1px solid rgba(248, 113, 113, 0.3)';
-    } else {
-        toast.style.background = 'rgba(167, 139, 250, 0.15)';
-        toast.style.color = '#a78bfa';
-        toast.style.border = '1px solid rgba(167, 139, 250, 0.3)';
-    }
+// ─── Scroll Reveal ───
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.1 });
 
-    document.body.appendChild(toast);
-    setTimeout(() => {
-        toast.style.animation = 'fadeInUp 0.3s ease-in reverse forwards';
-        setTimeout(() => toast.remove(), 300);
-    }, 3500);
-}
+document.querySelectorAll('.section-label, .section-title-xl, .how-card, .sample-item').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+    observer.observe(el);
+});
+
+// Add revealed class styles
+const style = document.createElement('style');
+style.textContent = '.revealed { opacity: 1 !important; transform: translateY(0) !important; }';
+document.head.appendChild(style);
